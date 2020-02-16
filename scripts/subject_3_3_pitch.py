@@ -16,7 +16,7 @@ from zeabus.ros import message as nm
 
 from zeabus.math.general import bound_radian , equal , same_sign
 
-from zeabus.connvertion.control import ControlHandle
+from zeabus.connection.control import ControlHandle
 
 from zeabus_utility.srv import SendBool, SendBoolResponse
 
@@ -41,37 +41,44 @@ class Subject33Pitch:
             while self.state : # Lopp working
 
                 if reset_state:
-                    self.ch.activate( False )
+                    self.ch.activate( True )
+                    self.ch.sleep()
                     self.ch.reset_all( False ) # Reset only orientation
+                    self.ch.sleep()
                     self.ch.absolute_pitch( 0 )
+                    self.ch.sleep()
                     self.ch.absolute_roll( 0 )
-                    self.ch.absolute_depth( -1 )
+                    self.ch.sleep()
+                    self.ch.absolute_depth( -1.5 )
+                    self.ch.sleep()
                     self.ch.set_mask()
+                    self.ch.sleep()
                     reset_state = False
 
-                self.ch.pub( "Waiting z ok position in one time" )
-                
-                while self.ch.check_error( z = 0.05 ) and self.ch.ok():
+                self.ch.pub( "Waiting z ok position in four time" )
+                self.ch.sleep()
+                while ( not self.ch.check_error( z = 0.05 ) ) and self.ch.ok() and self.state:
                     self.ch.sleep()
 
-                self.ch.set_mask( pitch = False )
+                self.ch.set_mask( yaw = False )
 
-                self.ch.pub( "Command addition force positive pitch" )
+                self.ch.pub( "Command addition force positive yaw" )
                 start_time = rospy.get_rostime()
-                while self.ch.ok() and ( rospy.get_rostime() - start_time ).to_sec() < 15:
-                    self.ch.add_force( pitch = 1 )
+                while self.ch.ok() and ( rospy.get_rostime() - start_time ).to_sec() < 15 and self.state:
+                    self.ch.add_force( yaw = 0.8 )
                     self.ch.sleep()
 
-                self.ch.pub( "Command addition force negative pitch" )
+                self.ch.pub( "Command addition force negative yaw" )
                 start_time = rospy.get_rostime()
-                while self.ch.ok() and ( rospy.get_rostime() - start_time ).to_sec() < 15:
-                    self.ch.add_force( pitch = -1 )
+                while self.ch.ok() and ( rospy.get_rostime() - start_time ).to_sec() < 15 and self.state:
+                    self.ch.add_force( yaw = -0.8 )
                     self.ch.sleep()
 
+                self.ch.add_force( yaw = 0 )
+                self.ch.pub( "Finish pitch testing" )
+                self.ch.absolute_pitch( 0 )
                 self.ch.absolute_depth( -0.15 )
                 self.ch.set_mask()
-                while self.ch.check_error( z = 0.2 ) and self.ch.ok():
-                    self.ch.sleep()
                 self.ch.activate( False ) 
                 self.ch.pub( "Finish stop process" )
                 self.state = False

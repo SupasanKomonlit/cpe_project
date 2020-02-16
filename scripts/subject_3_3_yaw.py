@@ -16,7 +16,7 @@ from zeabus.ros import message as nm
 
 from zeabus.math.general import bound_radian , equal , same_sign
 
-from zeabus.connvertion.control import ControlHandle
+from zeabus.connection.control import ControlHandle
 
 from zeabus_utility.srv import SendBool, SendBoolResponse
 
@@ -41,7 +41,7 @@ class Subject33Yaw:
             while self.state : # Lopp working
 
                 if reset_state:
-                    self.ch.activate( False )
+                    self.ch.activate( True )
                     self.ch.reset_all( False ) # Reset only orientation
                     self.ch.absolute_pitch( 0 )
                     self.ch.absolute_roll( 0 )
@@ -50,21 +50,21 @@ class Subject33Yaw:
 
                 self.ch.pub( "Waiting z ok position in one time" )
                 
-                while self.ch.check_error( z = 0.05 ) and self.ch.ok():
+                while ( not self.ch.check_error( z = 0.05 ) ) and self.ch.ok() and self.state:
                     self.ch.sleep()
 
                 count_round = 0
                 save_state = self.ch.get_target()[1][0]
                 self.ch.pub( "Start posiive rotation yaw on " + str( save_state ) )
-                while count_round < 3 and self.ch.ok():
+                while count_round < 3 and self.ch.ok() and self.state:
                     
-                    while self.ch.ok():
+                    while self.ch.ok() and self.state:
                         self.ch.sleep()
                         self.ch.target_velocity( 0.6 )
                         if abs( bound_radian( save_state - self.ch[5] ) ) > 1:
                             break
                     
-                    while self.ch.ok():
+                    while self.ch.ok() and self.state:
                         self.ch.sleep()
                         self.ch.target_velocity( 0.6 )
                         if abs( bound_radian( save_state - self.ch[ 5] ) ) < 0.5:
@@ -74,15 +74,15 @@ class Subject33Yaw:
                                 
                 count_round = 0
                 self.ch.pub( "Start negative rotation yaw on " + str( save_state ) )
-                while count_round < 3 and self.ch.ok():
+                while count_round < 3 and self.ch.ok() and self.state:
                     
-                    while self.ch.ok():
+                    while self.ch.ok() and self.state:
                         self.ch.sleep()
                         self.ch.target_velocity( -0.6 )
                         if abs( bound_radian( save_state - self.ch[5] ) ) > 1:
                             break
                     
-                    while self.ch.ok():
+                    while self.ch.ok() and self.state:
                         self.ch.sleep()
                         self.ch.target_velocity( -0.6 )
                         if abs( bound_radian( save_state - self.ch[ 5] ) ) < 0.5:
@@ -92,8 +92,6 @@ class Subject33Yaw:
 
                 self.ch.absolute_depth( -0.15 )
                 self.ch.absolute_yaw( save_state )
-                while self.ch.check_error( yaw = 0.1 ) and self.ch.ok():
-                    self.ch.sleep()
                 self.ch.activate( False ) 
                 self.ch.pub( "Finish stop process" )
                 self.state = False
