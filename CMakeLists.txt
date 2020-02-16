@@ -1,5 +1,5 @@
 cmake_minimum_required( VERSION 2.8.3 )
-project( zeabus_localize )
+project( cpe_project )
 
 find_package( catkin REQUIRED COMPONENTS 
     tf
