@@ -98,7 +98,13 @@ int main( int argv , char** argc )
                         buffer_current_state[0].pose.pose.orientation.y , 
                         buffer_current_state[0].pose.pose.orientation.z , 
                         buffer_current_state[0].pose.pose.orientation.w );
-                message.state = buffer_current_state[ 0 ]; 
+                message.state = buffer_current_state[ 0 ];
+                boost::qvm::A0( vec_current_velocity ) = message.state.twist.twist.linear.x;
+                boost::qvm::A1( vec_current_velocity ) = message.state.twist.twist.linear.y;
+                boost::qvm::A2( vec_current_velocity ) = message.state.twist.twist.linear.z;
+                boost::qvm::A3( vec_current_velocity ) = message.state.twist.twist.angular.x;
+                boost::qvm::A4( vec_current_velocity ) = message.state.twist.twist.angular.y;
+                boost::qvm::A5( vec_current_velocity ) = message.state.twist.twist.angular.z;
                 calculate();
                 report( &publisher );
             } // you don't have data in buffer you can't do anything
