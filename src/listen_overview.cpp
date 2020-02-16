@@ -16,9 +16,10 @@
 #include    "listen_overview.hpp"
 
 tf::Quaternion current_quaternion( 0 ,0 , 0 , 1 );
-std::vector< nav_msgs::Quaternion > buffer_current_state;
+std::vector< nav_msgs::Odometry > buffer_current_state;
 boost::qvm::vec< double , 6 > vec_current_velocity = { 0 , 0 , 0 , 0 , 0 , 0 };  
 boost::qvm::mat< double , 1 , 8 > mat_force_individual_thruster = { 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 };
+cpe_project::Project message;
 
 int main( int argv , char** argc )
 {
@@ -34,7 +35,7 @@ int main( int argv , char** argc )
     zeabus_ros::subscriber::BaseClass< zeabus_utility::Float64Array8 > listen_current_force( &nh,
             &message_current_force );
     listen_current_force.setup_mutex_data( &lock_message_current_force );
-    listen_current_force.setup_subscriber( "/control/force/current" );
+    listen_current_force.setup_subscriber( "/control/force/current" , 1 );
 
     // setup part listen current state
     std::mutex lock_message_current_state;
@@ -42,7 +43,9 @@ int main( int argv , char** argc )
     zeabus_ros::subscriber::BaseClass< nav_msgs::Odometry > listen_current_state( &nh,
             &message_current_state );
     listen_current_state.setup_mutex_data( &lock_message_current_state );
-    listen_current_state.setup_subscriber( "localize/zeabus" );
+    listen_current_state.setup_subscriber( "localize/zeabus" , 1 );
+
+    ros::Publisher publisher = nh.advertise< cpe_project::Project >( "/project/subject_3_3" , 10 );
 
     ros::Rate rate( 50 );
     ros::Time stamp_force = ros::Time::now();
@@ -57,22 +60,10 @@ int main( int argv , char** argc )
         {
             stamp_force = message_current_force.header.stamp;
             have_new_message = true;
-            boost::qvm::A00( mat_force_thruster ) = message_current_force.data[ 0 ] *
-                    zeabus::robot::gravity;
-            boost::qvm::A01( mat_force_thruster ) = message_current_force.data[ 1 ] *
-                    zeabus::robot::gravity;
-            boost::qvm::A02( mat_force_thruster ) = message_current_force.data[ 2 ] *
-                    zeabus::robot::gravity;
-            boost::qvm::A03( mat_force_thruster ) = message_current_force.data[ 3 ] *
-                    zeabus::robot::gravity;
-            boost::qvm::A04( mat_force_thruster ) = message_current_force.data[ 4 ] *
-                    zeabus::robot::gravity;
-            boost::qvm::A05( mat_force_thruster ) = message_current_force.data[ 5 ] *
-                    zeabus::robot::gravity;
-            boost::qvm::A06( mat_force_thruster ) = message_current_force.data[ 6 ] *
-                    zeabus::robot::gravity;
-            boost::qvm::A07( mat_force_thruster ) = message_current_force.data[ 7 ] *
-                    zeabus::robot::gravity;
+            std::memcpy( (void*) &mat_force_individual_thruster.a[0][0] , 
+                    (void*) message_current_force.data.c_array(),
+                    sizeof( double ) * 8 );
+            mat_force_individual_thruster *= zeabus::robot::gravity;
         }
         lock_message_current_force.unlock();
         // Load message of current state
@@ -80,7 +71,7 @@ int main( int argv , char** argc )
         if( stamp_state < message_current_state.header.stamp )
         {
             stamp_state = message_current_state.header.stamp;
-            buffer_current_state.push( message_current_state );
+            buffer_current_state.push_back( message_current_state );
         }
         lock_message_current_state.unlock();
 
@@ -102,10 +93,14 @@ int main( int argv , char** argc )
                         break; 
                     } // Now index 1 (count from 0) have stamp_state > stamp_force 
                 }
-                zeabus_ros::convert::geometry_quaternion::tf( &buffer_current_state[0].header.stamp,
-                        &current_quaternion );
+                current_quaternion = tf::Quaternion( 
+                        buffer_current_state[0].pose.pose.orientation.x , 
+                        buffer_current_state[0].pose.pose.orientation.y , 
+                        buffer_current_state[0].pose.pose.orientation.z , 
+                        buffer_current_state[0].pose.pose.orientation.w );
+                message.state = buffer_current_state[ 0 ]; 
                 calculate();
-                report();
+                report( &publisher );
             } // you don't have data in buffer you can't do anything
             
         }

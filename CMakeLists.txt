@@ -36,3 +36,16 @@ catkin_package(
     CATKIN_DEPENDS roscpp message_runtime std_msgs nav_msgs
     DEPENDS Boost zeabus_library
 )
+
+add_executable( subject_3_3 
+    src/listen_overview.cpp
+    src/purpose_3_3.cpp
+)
+target_link_libraries( subject_3_3 
+    ${zeabus_library_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${catkin_LIBRARIES}
+)
+add_dependencies( subject_3_3 
+    cpe_project_generate_messages_cpp 
+)
