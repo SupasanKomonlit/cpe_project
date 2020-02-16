@@ -105,3 +105,7 @@ class Subject33Yaw:
     def callback_state( self , request ):
         self.state = request.data
         return SendBoolResponse()
+
+if __name__ == "__main__":
+    mission = Subject33Yaw()
+    mission.activate()
