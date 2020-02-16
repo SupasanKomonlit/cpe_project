@@ -5,6 +5,7 @@ find_package( catkin REQUIRED COMPONENTS
     tf
     roscpp
     nav_msgs
+    std_msgs
     sensor_msgs
     zeabus_utility
     dynamic_reconfigure
@@ -20,7 +21,18 @@ include_directories(
     "${PROJECT_SOURCE_DIR}/include"
 )
 
+add_message_files(
+    FILES
+    Project.msg
+)
+
+generate_messages(
+    DEPENDENCIES
+    std_msgs
+    nav_msgs
+)
+
 catkin_package(
-    CATKIN_DEPENDS roscpp
+    CATKIN_DEPENDS roscpp message_runtime std_msgs nav_msgs
     DEPENDS Boost zeabus_library
 )
