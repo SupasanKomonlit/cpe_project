@@ -84,7 +84,7 @@ int main( int argv , char** argc )
             {
                 while( buffer_current_state.size() > 1 )
                 {
-                    if( buffer_current_state[2].header.stamp < stamp_state )
+                    if( buffer_current_state[2].header.stamp < stamp_force )
                     {
                         buffer_current_state.erase( buffer_current_state.begin() );
                     } // Can use index 1 (count form 0 ) instead index 0
@@ -98,6 +98,7 @@ int main( int argv , char** argc )
                         buffer_current_state[0].pose.pose.orientation.y , 
                         buffer_current_state[0].pose.pose.orientation.z , 
                         buffer_current_state[0].pose.pose.orientation.w );
+                message.header.stamp = stamp_force;
                 message.state = buffer_current_state[ 0 ];
                 boost::qvm::A0( vec_current_velocity ) = message.state.twist.twist.linear.x;
                 boost::qvm::A1( vec_current_velocity ) = message.state.twist.twist.linear.y;
