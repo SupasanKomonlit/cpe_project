@@ -20,7 +20,7 @@ from zeabus.connection.control import ControlHandle
 
 from zeabus_utility.srv import SendBool, SendBoolResponse
 
-class Subject33Yaw:
+class Subject33Pitch:
 
     def __init__( self ):
         rospy.init_node( "project33" )
@@ -42,56 +42,46 @@ class Subject33Yaw:
 
                 if reset_state:
                     self.ch.activate( True )
+                    self.ch.sleep()
                     self.ch.reset_all( False ) # Reset only orientation
+                    self.ch.sleep()
                     self.ch.absolute_pitch( 0 )
+                    self.ch.sleep()
                     self.ch.absolute_roll( 0 )
-                    self.ch.absolute_depth( -1 )
+                    self.ch.sleep()
+                    self.ch.absolute_depth( -1.0 )
+                    self.ch.sleep()
+                    self.ch.set_mask()
+                    self.ch.sleep()
                     reset_state = False
 
-                self.ch.pub( "Waiting z ok position in one time" )
-                
+                self.ch.pub( "Waiting z ok position in one" )
+                self.ch.sleep()
                 while ( not self.ch.check_error( z = 0.05 ) ) and self.ch.ok() and self.state:
                     self.ch.sleep()
 
-                count_round = 0
-                save_state = self.ch.get_target()[1][0]
-                self.ch.pub( "Start posiive rotation yaw on " + str( save_state ) )
-                while count_round < 3 and self.ch.ok() and self.state:
-                    
-                    while self.ch.ok() and self.state:
-                        self.ch.sleep()
-                        self.ch.target_velocity( 0.6 )
-                        if abs( bound_radian( save_state - self.ch[5] ) ) > 1:
-                            break
-                    
-                    while self.ch.ok() and self.state:
-                        self.ch.sleep()
-                        self.ch.target_velocity( 0.6 )
-                        if abs( bound_radian( save_state - self.ch[ 5] ) ) < 0.5:
-                            count_round += 1
-                            self.ch.pub( "positive rotation " + str( count_round ) + " round" )
-                            break
-                                
-                count_round = 0
-                self.ch.pub( "Start negative rotation yaw on " + str( save_state ) )
-                while count_round < 3 and self.ch.ok() and self.state:
-                    
-                    while self.ch.ok() and self.state:
-                        self.ch.sleep()
-                        self.ch.target_velocity( -0.6 )
-                        if abs( bound_radian( save_state - self.ch[5] ) ) > 1:
-                            break
-                    
-                    while self.ch.ok() and self.state:
-                        self.ch.sleep()
-                        self.ch.target_velocity( -0.6 )
-                        if abs( bound_radian( save_state - self.ch[ 5] ) ) < 0.5:
-                            count_round += 1
-                            self.ch.pub( "negative rotation " + str( count_round ) + " round" )
-                            break
+                self.ch.set_mask( yaw = False )
 
+                self.ch.pub( "Command addition force positive yaw" )
+                start_time = rospy.get_rostime()
+                while self.ch.ok() and self.state:
+                    self.ch.add_force( yaw = 0.8 )
+                    self.ch.sleep()
+                    if ( rospy.get_rostime() - start_time ).to_sec() < 20:
+                        break
+
+                self.ch.pub( "Command addition force negative yaw" )
+                start_time = rospy.get_rostime()
+                while self.ch.ok() and self.state:
+                    self.ch.add_force( yaw = -0.8 )
+                    self.ch.sleep()
+                    if ( rospy.get_rostime() - start_time ).to_sec() < 20:
+                        break
+
+                self.ch.add_force( yaw = 0 )
+                self.ch.pub( "Finish yaw testing" )
                 self.ch.absolute_depth( -0.15 )
-                self.ch.absolute_yaw( save_state )
+                self.ch.set_mask()
                 self.ch.activate( False ) 
                 self.ch.pub( "Finish stop process" )
                 self.state = False
@@ -105,5 +95,5 @@ class Subject33Yaw:
         return SendBoolResponse()
 
 if __name__ == "__main__":
-    mission = Subject33Yaw()
+    mission = Subject33Pitch()
     mission.activate()

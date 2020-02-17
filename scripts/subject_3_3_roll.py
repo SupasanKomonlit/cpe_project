@@ -45,7 +45,7 @@ class Subject33Roll:
                     self.ch.reset_all( False ) # Reset only orientation
                     self.ch.absolute_pitch( 0 )
                     self.ch.absolute_roll( 0 )
-                    self.ch.absolute_depth( -1 )
+                    self.ch.absolute_depth( -1.5 )
                     self.ch.set_mask()
                     reset_state = False
 
@@ -58,15 +58,19 @@ class Subject33Roll:
 
                 self.ch.pub( "Command addition force positive roll" )
                 start_time = rospy.get_rostime()
-                while self.ch.ok() and ( rospy.get_rostime() - start_time ).to_sec() < 15 and self.state:
+                while self.ch.ok() and self.state:
                     self.ch.add_force( roll = 1.2 )
                     self.ch.sleep()
+                    if ( rospy.get_rostime() - start_time ).to_sec() < 20:
+                        break
 
                 self.ch.pub( "Command addition force negative roll" )
                 start_time = rospy.get_rostime()
-                while self.ch.ok() and ( rospy.get_rostime() - start_time ).to_sec() < 15 and self.state:
+                while self.ch.ok() and self.state:
                     self.ch.add_force( roll = -1.2 )
                     self.ch.sleep()
+                    if ( rospy.get_rostime() - start_time ).to_sec() < 20:
+                        break
 
                 self.ch.absolute_roll( 0 )
                 self.ch.absolute_depth( -0.15 )

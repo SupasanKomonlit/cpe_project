@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# FILE      : subject_3_3_roll.py
+# FILE      : subject_3_3_pitch.py
 # AUTHOR    : K.Supasan
 # CREATE ON : 2020, Febuary 16
 # MAINTAINER: K.Supasan
@@ -55,7 +55,7 @@ class Subject33Pitch:
                     self.ch.sleep()
                     reset_state = False
 
-                self.ch.pub( "Waiting z ok position in four time" )
+                self.ch.pub( "Waiting z ok position in one" )
                 self.ch.sleep()
                 while ( not self.ch.check_error( z = 0.05 ) ) and self.ch.ok() and self.state:
                     self.ch.sleep()
@@ -64,20 +64,24 @@ class Subject33Pitch:
 
                 self.ch.pub( "Command addition force positive yaw" )
                 start_time = rospy.get_rostime()
-                while self.ch.ok() and ( rospy.get_rostime() - start_time ).to_sec() < 15 and self.state:
-                    self.ch.add_force( yaw = 0.8 )
+                while self.ch.ok() and self.state:
+                    self.ch.add_force( pitch = -2 )
                     self.ch.sleep()
+                    if ( rospy.get_rostime() - start_time ).to_sec() < 20:
+                        break
 
                 self.ch.pub( "Command addition force negative yaw" )
                 start_time = rospy.get_rostime()
-                while self.ch.ok() and ( rospy.get_rostime() - start_time ).to_sec() < 15 and self.state:
-                    self.ch.add_force( yaw = -0.8 )
+                while self.ch.ok() and self.state:
+                    self.ch.add_force( pitch = -2 )
                     self.ch.sleep()
+                    if ( rospy.get_rostime() - start_time ).to_sec() < 20:
+                        break
 
                 self.ch.add_force( yaw = 0 )
                 self.ch.pub( "Finish pitch testing" )
-                self.ch.absolute_pitch( 0 )
                 self.ch.absolute_depth( -0.15 )
+                self.ch.absolute_pitch( 0 )
                 self.ch.set_mask()
                 self.ch.activate( False ) 
                 self.ch.pub( "Finish stop process" )
