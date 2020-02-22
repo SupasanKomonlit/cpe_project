@@ -49,3 +49,16 @@ target_link_libraries( subject_3_3
 add_dependencies( subject_3_3 
     cpe_project_generate_messages_cpp 
 )
+
+add_executable( find_center
+    src/learn_center.cpp
+    src/learn_center_model.cpp
+)
+target_link_libraries( find_center
+    ${zeabus_library_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${catkin_LIBRARIES}
+)
+add_dependencies( find_center 
+    cpe_project_generate_messages_cpp
+)
