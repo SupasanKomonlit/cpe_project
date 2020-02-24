@@ -21,6 +21,8 @@
 
 #include    <zeabus/robot.hpp>
 #include    <zeabus/ros/node.hpp>
+#include    <zeabus/ros/path_file.hpp>
+#include    <zeabus/math/boost/operations.hpp>
 #include    <zeabus/math/boost/print_data.hpp>
 
 #include    <tf/LinearMath/Quaternion.h>

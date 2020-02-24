@@ -75,3 +75,16 @@ target_link_libraries( find_inertia
 add_dependencies( find_inertia 
     cpe_project_generate_messages_cpp
 )
+
+add_executable( observer 
+    src/observer.cpp
+    src/observer_model.cpp
+)
+target_link_libraries( observer
+    ${zeabus_library_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${catkin_LIBRARIES}
+)
+add_dependencies( observer 
+    cpe_project_generate_messages_cpp
+)

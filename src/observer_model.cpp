@@ -32,17 +32,23 @@ void active_model()
         0,  0,  cos( pitch ) * cos( roll )
     };
 
-    mat_force_gravity = zeabus::robot::mat_center_gravity * 
-            mat_rotation_force_z *
-            zeabus::robot::mat_force_gravity;
+    zeabus_boost::mat_concat( &mat_force_gravity , 
+            mat_rotation_force_z * zeabus::robot::mat_force_gravity,
+            zeabus::robot::mat_center_gravity * 
+                    mat_rotation_force_z * 
+                    zeabus::robot::mat_force_gravity );
 
-    mat_force_buoncy = zeabus::robot::mat_center_buoncy *
-            mat_rotation_force_z *
-            zeabus::robot::mat_force_buoncy;
+    zeabus_boost::mat_concat( &mat_force_buoncy,
+            mat_rotation_force_z * zeabus::robot::mat_force_buoncy,
+            zeabus::robot::mat_center_buoncy *
+                    mat_rotation_force_z *
+                    zeabus::robot::mat_force_buoncy );
 
-    mat_force_estimate = zeabus::robot::mat_center_constant *
-            mat_rotation_force_z *
-            zeabus::robot::mat_force_constant;
+    zeabus_boost::mat_concat( &mat_force_estimate,
+            mat_rotation_force_z * zeabus::robot::mat_force_buoncy,
+            zeabus::robot::mat_center_constant *
+                    mat_rotation_force_z *
+                    zeabus::robot::mat_force_constant );
 
     calculate_viscosity();
 

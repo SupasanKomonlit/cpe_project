@@ -17,6 +17,12 @@
 
 #include    "observer.hpp"
 
+boost::qvm::mat< double , 6 , 1 > mat_constant_viscosity_k = {0,0,0,0,0,0};
+boost::qvm::mat< double , 6 , 1 > mat_constant_viscosity_c = {0,0,0,0,0,0};
+boost::qvm::mat< double , 6 , 1 > mat_force_observer = {0,0,0,0,0,0};
+boost::qvm::mat< double , 6 , 1 > mat_force_thruster = {0,0,0,0,0,0};
+boost::array< double , 6 > arr_velocity;
+
 int main( int argv , char** argc )
 {
     zeabus_ros::Node node( argv , argc , "project_cpe" );
@@ -43,5 +49,19 @@ int main( int argv , char** argc )
 
     // setup part publisher calculate state
     ros::Publisher pub_observer_state = nh.advertise< nav_msgs::Odometry >( "/observer/zeabus" ,10 );
-    
+
+    // prepare data parameter
+    zeabus::FileCSV fh; // file handle
+    fh.open( zeabus_ros::get_full_path( "cpe_project" , "parameter" , "force_observer.txt" ) );
+    (void)zeabus::extract_csv_type_1( &fh , &(mat_force_observer.a[0]) );
+    fh.close();
+    fh.open( zeabus_ros::get_full_path( "cpe_project" , "parameter" , "viscosity_c.txt" ) );
+    (void)zeabus::extract_csv_type_1( &fh , &(mat_constant_viscosity_c.a[0]) );
+    fh.close();
+    fh.open( zeabus_ros::get_full_path( "cpe_project" , "parameter" , "viscosity_k.txt" ) );
+    (void)zeabus::extract_csv_type_1( &fh , &(mat_constant_viscosity_c.a[0]) );
+
+    std::cout   << "Parameter force observer\n"; zeabus_boost::print_data( mat_force_observer ); 
+    std::cout   << "Parameter viscosity c\n"; zeabus_boost::print_data( mat_constant_viscosity_c ); 
+    std::cout   << "Parameter viscosity k\n"; zeabus_boost::print_data( mat_constant_viscosity_k ); 
 }
