@@ -62,3 +62,16 @@ target_link_libraries( find_center
 add_dependencies( find_center 
     cpe_project_generate_messages_cpp
 )
+
+add_executable( find_inertia 
+    src/learn_moment_inertia_model.cpp
+    src/learn_moment_inertia.cpp
+)
+target_link_libraries( find_inertia
+    ${zeabus_library_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${catkin_LIBRARIES}
+)
+add_dependencies( find_inertia 
+    cpe_project_generate_messages_cpp
+)

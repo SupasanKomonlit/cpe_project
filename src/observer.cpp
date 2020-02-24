@@ -41,5 +41,7 @@ int main( int argv , char** argc )
     listen_current_state.setup_mutex_data( &lock_message_current_state );
     listen_current_state.setup_subscriber( "localize/zeabus" , 1 );
 
+    // setup part publisher calculate state
+    ros::Publisher pub_observer_state = nh.advertise< nav_msgs::Odometry >( "/observer/zeabus" ,10 );
     
 }
