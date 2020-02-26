@@ -9,21 +9,29 @@ find_package( catkin REQUIRED COMPONENTS
     sensor_msgs
     zeabus_utility
     dynamic_reconfigure
+    cv_bridge
+    image_transport
 )
 
 find_package( Boost REQUIRED COMPONENTS )
 find_package( zeabus_library REQUIRED COMPONENTS )
+find_package( OpenCV REQUIRED  )
 
 include_directories(
     ${catkin_INCLUDE_DIRS}
     ${zeabus_library_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
     "${PROJECT_SOURCE_DIR}/include"
 )
 
 add_message_files(
     FILES
     Project.msg
+)
+
+generate_dynamic_reconfigure_options(
+    cfg/Simple3Data.cfg
 )
 
 generate_messages(
@@ -34,7 +42,7 @@ generate_messages(
 
 catkin_package(
     CATKIN_DEPENDS roscpp message_runtime std_msgs nav_msgs
-    DEPENDS Boost zeabus_library
+    DEPENDS Boost zeabus_library ${PROJECT_NAME}_gencfg
 )
 
 add_executable( subject_3_3 
@@ -79,6 +87,8 @@ add_dependencies( find_inertia
 add_executable( observer 
     src/observer.cpp
     src/observer_model.cpp
+    src/observer_update.cpp
+    src/observer_gradient.cpp
 )
 target_link_libraries( observer
     ${zeabus_library_LIBRARIES}
@@ -87,4 +97,17 @@ target_link_libraries( observer
 )
 add_dependencies( observer 
     cpe_project_generate_messages_cpp
+)
+
+add_executable( bottom 
+    src/vision_bottom.cpp
+)
+target_link_libraries( bottom 
+    ${zeabus_library_LIBRARIES}
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBRARIES}
+)
+add_dependencies( bottom
+    cpe_project_generate_messages_cpp
+    ${PROJECT_NAME}_gencfg
 )

@@ -17,7 +17,7 @@
 
 boost::qvm::mat< double , 6 , 1 > mat_force_gravity = {0,0,0,0,0,0};
 boost::qvm::mat< double , 6 , 1 > mat_force_buoncy = {0,0,0,0,0,0};
-boost::qvm::mat< double , 6 , 1 > mat_force_estimate = {0,0,0,0,0,0}
+boost::qvm::mat< double , 6 , 1 > mat_force_estimate = {0,0,0,0,0,0};
 boost::qvm::mat< double , 6 , 1 > mat_force_viscosity = {0,0,0,0,0,0};
 boost::qvm::mat< double , 6 , 1 > mat_acceleration = {0,0,0,0,0,0};
 double roll;
@@ -61,22 +61,22 @@ void active_model()
             mat_force_observer );
 }
 
-void calculate_viscosity()
+inline void calculate_viscosity()
 {
     boost::qvm::A00( mat_force_viscosity ) = viscosity( 0 ); 
-    boost::qvm::A01( mat_force_viscosity ) = viscosity( 1 ); 
-    boost::qvm::A02( mat_force_viscosity ) = viscosity( 2 ); 
-    boost::qvm::A03( mat_force_viscosity ) = viscosity( 3 ); 
-    boost::qvm::A04( mat_force_viscosity ) = viscosity( 4 ); 
-    boost::qvm::A05( mat_force_viscosity ) = viscosity( 5 ); 
+    boost::qvm::A10( mat_force_viscosity ) = viscosity( 1 ); 
+    boost::qvm::A20( mat_force_viscosity ) = viscosity( 2 ); 
+    boost::qvm::A30( mat_force_viscosity ) = viscosity( 3 ); 
+    boost::qvm::A40( mat_force_viscosity ) = viscosity( 4 ); 
+    boost::qvm::A50( mat_force_viscosity ) = viscosity( 5 ); 
 }
 
-inline void viscosity( unsigned int index )
+inline double viscosity( unsigned int index )
 {
 #ifdef VISCOSITY_NONNEWTON
-    return -1.0 * mat_constant_viscosity_k.a[ index ] * 
-            ( 1 - exp( -1.0 * mat_constant_viscosity_c.a[ index ] * arr_velocity[ index ]) );
+    return -1.0 * mat_constant_viscosity_k.a[ index ][0] * 
+            ( 1 - exp( -1.0 * mat_constant_viscosity_c.a[ index ][0] * arr_robot_velocity[ index ]));
 #else
-    return mat_constant_viscosity_k.a[ index ] * arr_velocity[ index ];
+    return mat_constant_viscosity_k.a[ index ][0] * arr_robot_velocity[ index ][0];
 #endif // viscosity
 }
