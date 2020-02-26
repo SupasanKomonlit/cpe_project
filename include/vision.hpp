@@ -15,7 +15,7 @@
 
 // MACRO CONDITION
 
-#include    <algotithm>
+#include    <algorithm>
 #include    <mutex>
 #include    <iostream>
 #include    <vector>
@@ -24,6 +24,7 @@
 
 #include    <zeabus/ros/node.hpp>
 #include    <zeabus/ros/subscriber/base_class.hpp>
+#include    <zeabus/ros/dynamic_reconfigure.hpp>
 
 #include    <sensor_msgs/CompressedImage.h>
 #include    <sensor_msgs/Image.h>

@@ -32,7 +32,9 @@ unsigned int upper_third = 199;
 unsigned int down_first = 51;
 unsigned int down_second = 107;
 unsigned int down_third = 30;
-const double min_area = 500;
+const double min_area = 1000;
+bool dump_data = false;
+
 
 bool find_rectangle( std::vector< cv::Point2f > center , double* index )
 {
@@ -49,16 +51,38 @@ exit_find_rectangle:
 
 void dynamic_reconfigure_callback( cpe_project::Simple3DataConfig &config , uint32_t level )
 {
-    lock_config.lock();
-    upper_first = config.upper_first;
-    upper_second = config.upper_second;
-    upper_third = config.upper_third;
-    down_first = config.down_first;
-    down_second = config.down_second;
-    down_third = config.down_third;
-    std::cout   << "Upper :" << upper_first << " : " << upper_second << " : " << upper_third << "\n";
-    std::cout   << "Down  :" << down_first << " : " << down_second << " : " << down_third << "\n";
-    lock_config.unlock();
+    int level_data = (int)level;
+    if( level_data == -1 )
+    {
+        std::cout   << "Start config?\n";
+        config.upper_first = upper_first;
+        config.upper_second = upper_second;
+        config.upper_third = upper_third;
+        config.down_first = down_first;
+        config.down_second = down_second;
+        config.down_third = down_third;
+    }
+    else
+    {
+        lock_config.lock();
+        upper_first = config.upper_first;
+        upper_second = config.upper_second;
+        upper_third = config.upper_third;
+        down_first = config.down_first;
+        down_second = config.down_second;
+        down_third = config.down_third;
+        std::cout   << "Upper :" << upper_first << " : " 
+                    << upper_second << " : " 
+                    << upper_third << "\n";
+        std::cout   << "Down  :" << down_first << " : " 
+                    << down_second << " : " 
+                    << down_third << "\n";
+        if( level_data == 1 )
+        {
+            dump_data = true;
+        }
+        lock_config.unlock();
+    }
 }
 
 void imageCallback( const sensor_msgs::ImageConstPtr& msg )
@@ -82,6 +106,7 @@ int main( int argv , char** argc )
     dynamic_reconfigure::Server< cpe_project::Simple3DataConfig >::CallbackType function_reconfigure;
     function_reconfigure = boost::bind( &dynamic_reconfigure_callback , _1 , _2 );
     server_reconfigure.setCallback( function_reconfigure );
+    zeabus_ros::DynamicReconfigure drh; // dynamic reconfigur handle
 
     // _image_transport:=compressed
     image_transport::ImageTransport it( nh );
@@ -104,6 +129,8 @@ int main( int argv , char** argc )
 
     std::vector< std::vector< cv::Point > > contours;
     std::vector< cv::Vec4i > hierachy;
+
+    drh.load( "cpe_project" , "parameter" , "bottom.yaml" , ros::this_node::getName() );
     
     while( ros::ok() )
     {
@@ -129,6 +156,11 @@ int main( int argv , char** argc )
                 cv::Scalar( down_first , down_second , down_third ),
                 cv::Scalar( upper_first , upper_second , upper_third ), 
                 image_threshold );
+        if( dump_data )
+        {
+            drh.dump( "cpe_project" , "parameter" , "bottom.yaml" , ros::this_node::getName() );
+            dump_data = false;
+        }
         lock_config.unlock();
         message_publish = cv_bridge::CvImage( header , "mono8" , image_threshold ).toImageMsg();
         pub_the.publish( message_publish );
@@ -159,9 +191,11 @@ int main( int argv , char** argc )
             cv::minEnclosingCircle( contours.at( run ) , temp_point , temp_radius );
             center_circle.push_back( temp_point );
             radius_circle.push_back( temp_radius );
+/*
             std::cout   << "Center " << center_circle.at( run ).x 
                         << " " << center_circle.at( run ).y  
                         << " have radius " << radius_circle.at( run ) << "\n";
+*/
         }
         cv::drawContours( image_contours , contours , -1 , cv::Scalar( 255 , 0 , 0 ) ,
                 cv::FILLED );

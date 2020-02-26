@@ -1,0 +1,27 @@
+!!python/object/new:dynamic_reconfigure.encoding.Config
+dictitems:
+  down_first: 51
+  down_second: 107
+  down_third: 30
+  groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+    dictitems:
+      down_first: 51
+      down_second: 107
+      down_third: 30
+      groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      id: 0
+      name: Default
+      parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      parent: 0
+      state: true
+      type: ''
+      upper_first: 95
+      upper_second: 214
+      upper_third: 199
+    state: []
+  upper_first: 95
+  upper_second: 214
+  upper_third: 199
+state: []

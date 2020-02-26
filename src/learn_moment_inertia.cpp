@@ -51,7 +51,7 @@ int main( int argv , char** argc )
 
     // prapare data for training
     zeabus::FileCSV fh; // file handle
-    fh.open( zeabus_ros::get_full_path( "cpe_project" , "parameter" , "project_4_1_3_sample.csv") );
+    fh.open( zeabus_ros::get_full_path( "cpe_project" , "data" , "project_4_1_3_sample.csv") );
     double *thruster_force, *euler_state, *angular_vel, *angular_accel;
     unsigned int number_data;
     (void)fh.count_line( &number_data );
