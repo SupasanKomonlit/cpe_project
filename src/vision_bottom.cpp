@@ -32,22 +32,10 @@ unsigned int upper_third = 199;
 unsigned int down_first = 51;
 unsigned int down_second = 107;
 unsigned int down_third = 30;
-const double min_area = 1000;
+const double min_area = 500;
+const double min_ratio = 0.8; // max is 1
+const double max_variance = 1000;
 bool dump_data = false;
-
-
-bool find_rectangle( std::vector< cv::Point2f > center , double* index )
-{
-    bool result;
-    if( center.size() < 4 )
-    {
-        result = false;
-    }
-    
-
-exit_find_rectangle:
-    return result;
-}
 
 void dynamic_reconfigure_callback( cpe_project::Simple3DataConfig &config , uint32_t level )
 {
@@ -131,6 +119,9 @@ int main( int argv , char** argc )
     std::vector< cv::Vec4i > hierachy;
 
     drh.load( "cpe_project" , "parameter" , "bottom.yaml" , ros::this_node::getName() );
+
+    std::vector< cv::Point2f > vec_center;    
+    zeabus_opencv::structure::LineRect rect_line;
     
     while( ros::ok() )
     {
@@ -171,7 +162,12 @@ int main( int argv , char** argc )
         for( auto it = contours.begin() ; it != contours.end() ; )
         {
             double area = cv::contourArea( *it , false );
-            if( min_area > area )
+            cv::RotatedRect rect = cv::minAreaRect( *it );
+            if( min_ratio > zeabus_opencv::operations::ratio( rect.size ) )
+            {
+                it = contours.erase( it );
+            }
+            else if( min_area > area )
             {
                 it = contours.erase( it );
             }
@@ -181,25 +177,115 @@ int main( int argv , char** argc )
                 ++it;
             }
         }
-        std::cout   << "Min Area Contours size is " << contours.size() << "\n";
-        std::vector< cv::Point2f > center_circle;
-        std::vector< float > radius_circle;
+//        std::cout   << "After cut condition remain " << contours.size() << "\n";
+        cv::drawContours( image_contours , contours , -1 , cv::Scalar( 255 , 0 , 0 ) ,
+                cv::FILLED );
+        
+        std::vector< zeabus_opencv::structure::Circle > vec_circle;
         cv::Point2f temp_point;
         float temp_radius;
         for( unsigned int run = 0 ; run < contours.size() ; run++ )
         {
             cv::minEnclosingCircle( contours.at( run ) , temp_point , temp_radius );
-            center_circle.push_back( temp_point );
-            radius_circle.push_back( temp_radius );
-/*
-            std::cout   << "Center " << center_circle.at( run ).x 
-                        << " " << center_circle.at( run ).y  
-                        << " have radius " << radius_circle.at( run ) << "\n";
-*/
+            vec_circle.push_back( zeabus_opencv::structure::Circle( temp_point , temp_radius ) );
         }
-        cv::drawContours( image_contours , contours , -1 , cv::Scalar( 255 , 0 , 0 ) ,
-                cv::FILLED );
+
+        zeabus_opencv::sort::cpp_sort( &vec_circle );
+        int min_index = -1;
+        double min_variance = max_variance; 
+        cv::Mat_<double> rotation_vector, translation_vector;
+        std::vector< cv::Point3_< double > > vec_object;
+        for( int run = 0 ; run < ( ( int )vec_circle.size() )- 3 ; run++ )
+        {
+            double mean = ( vec_circle.at( run ).radius + 
+                    vec_circle.at( run + 1 ).radius +
+                    vec_circle.at( run + 2 ).radius +
+                    vec_circle.at( run + 3 ).radius ) / 4.0 ;
+            double variance = ( pow( mean - vec_circle.at( run ).radius , 2 ) +
+                    pow( mean - vec_circle.at( run + 1 ).radius , 2 ) +
+                    pow( mean - vec_circle.at( run + 2 ).radius , 2 ) +
+                    pow( mean - vec_circle.at( run + 3 ).radius , 2 ) / 4.0 ) ;
+            if( variance <= min_variance )
+            {
+                min_variance = variance;
+                min_index = run;
+            }
+//            std::cout   << "Variance of index " << run << " is " << variance << "\n";            
+        }
+
+        if( min_index == -1 )
+        {
+            goto finish_find_box;
+        }
+
+        vec_circle.assign( vec_circle.begin() + min_index , vec_circle.begin() + min_index + 4 );
+//        std::cout   << "Radius :";
+        for( auto it = vec_circle.begin() ; it != vec_circle.end() ; it++ )
+        {
+//            std::cout   << " " << it->radius;
+            cv::circle( image_contours , it->center , it->radius ,
+                    cv::Scalar( 0 , 255 , 255 ) , 10 , cv::LINE_8 );
+        }
+//        std::cout   << "\n";
+        vec_center.clear();
+        zeabus_opencv::operations::pull_center( vec_circle , &vec_center );
+        zeabus_opencv::sort::center( &vec_center );
+        if( vec_center.at( 0 ).x < vec_center.at( 1 ).x )
+        {
+            rect_line.bl = vec_center.at( 0 );
+            rect_line.br = vec_center.at( 1 );
+        }
+        else
+        {
+            rect_line.bl = vec_center.at( 1 );
+            rect_line.br = vec_center.at( 0 );
+        }
+        if( vec_center.at( 2 ).x < vec_center.at( 3 ).x )
+        {
+            rect_line.tl = vec_center.at( 2 );
+            rect_line.tr = vec_center.at( 3 );
+        }
+        else
+        {
+            rect_line.tl = vec_center.at( 3 );
+            rect_line.tr = vec_center.at( 2 );
+        }
         
+        cv::line( image_contours , rect_line.bl , rect_line.tl,
+                cv::Scalar( 255 , 255 , 0 ) , 5 , cv::LINE_8 );
+        cv::line( image_contours , rect_line.bl , rect_line.br,
+                cv::Scalar( 255 , 255 , 0 ) , 5 , cv::LINE_8 );
+        cv::line( image_contours , rect_line.tr , rect_line.tl,
+                cv::Scalar( 255 , 255 , 0 ) , 5 , cv::LINE_8 );
+        cv::line( image_contours , rect_line.tr , rect_line.br,
+                cv::Scalar( 255 , 255 , 0 ) , 5 , cv::LINE_8 );
+
+        vec_object.push_back( cv::Point3_< double >( -292.91338583 , -255.11811024, 0 ) );
+        vec_object.push_back( cv::Point3_< double >( -292.91338583 , +255.11811024, 0 ) );
+        vec_object.push_back( cv::Point3_< double >( +292.91338583 , +255.11811024, 0 ) );
+        vec_object.push_back( cv::Point3_< double >( +292.91338583 , -255.11811024, 0 ) );
+        
+        cv::solvePnP( vec_object , rect_line.get_vector() , 
+                zeabus_opencv::bottom::mat_camera,
+                zeabus_opencv::bottom::mat_distor,
+                rotation_vector,
+                translation_vector );
+
+        std::cout   << "Rotation vector row " << rotation_vector.rows
+                    << " and col " << rotation_vector.cols << "\n";
+        zeabus_opencv::convert::to_m( translation_vector[0] );
+        zeabus_opencv::convert::to_m( translation_vector[1] );
+        zeabus_opencv::convert::to_m( translation_vector[2] );
+        printf( "%10.3f,%10.3f,%10.3f\n", *rotation_vector[ 0 ] , *rotation_vector[ 1 ],
+                *rotation_vector[ 2 ] );
+        std::cout   << "Translation vector row " << translation_vector.rows
+                    << " and col " << translation_vector.cols << "\n";
+        printf( "%10.3f,%10.3f,%10.3f\n", *translation_vector[ 0 ] , *translation_vector[ 1 ],
+                *translation_vector[ 2 ] );
+        std::cout   << "Translation vector row " << translation_vector.rows
+                    << " and col " << translation_vector.cols << "\n";
+        
+finish_find_box:
         message_publish = cv_bridge::CvImage( header , "rgb8" , image_contours ).toImageMsg();
         pub_cnt.publish( message_publish );
     }

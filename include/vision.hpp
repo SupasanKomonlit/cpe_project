@@ -26,6 +26,8 @@
 #include    <zeabus/ros/subscriber/base_class.hpp>
 #include    <zeabus/ros/dynamic_reconfigure.hpp>
 
+#include    <zeabus/opencv.hpp>
+
 #include    <sensor_msgs/CompressedImage.h>
 #include    <sensor_msgs/Image.h>
 
@@ -36,6 +38,7 @@
 #include    <opencv2/imgcodecs.hpp>
 #include    <opencv2/imgproc.hpp>
 #include    <opencv2/highgui/highgui.hpp>
+#include    <opencv2/calib3d.hpp>
 
 #include    <dynamic_reconfigure/server.h>
 #include    <cpe_project/Simple3DataConfig.h>

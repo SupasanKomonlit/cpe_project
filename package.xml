@@ -28,6 +28,9 @@
     <build_depend>zeabus_library</build_depend>
     <exec_depend>zeabus_library</exec_depend>
 
+    <build_depend>zeabus_vision</build_depend>
+    <exec_depend>zeabus_vision</exec_depend>
+
     <build_depend>Boost</build_depend>
     <exec_depend>Boost</exec_depend>
 

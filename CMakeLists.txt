@@ -15,11 +15,13 @@ find_package( catkin REQUIRED COMPONENTS
 
 find_package( Boost REQUIRED COMPONENTS )
 find_package( zeabus_library REQUIRED COMPONENTS )
+find_package( zeabus_vision REQUIRED COMPONENTS )
 find_package( OpenCV REQUIRED  )
 
 include_directories(
     ${catkin_INCLUDE_DIRS}
     ${zeabus_library_INCLUDE_DIRS}
+    ${zeabus_vision_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
     ${OpenCV_INCLUDE_DIRS}
     "${PROJECT_SOURCE_DIR}/include"
@@ -42,7 +44,7 @@ generate_messages(
 
 catkin_package(
     CATKIN_DEPENDS roscpp message_runtime std_msgs nav_msgs
-    DEPENDS Boost zeabus_library ${PROJECT_NAME}_gencfg
+    DEPENDS Boost zeabus_library ${PROJECT_NAME}_gencfg zeabus_vision
 )
 
 add_executable( subject_3_3 
@@ -104,6 +106,7 @@ add_executable( bottom
 )
 target_link_libraries( bottom 
     ${zeabus_library_LIBRARIES}
+    ${zeabus_vision_LIBRARIES}
     ${catkin_LIBRARIES}
     ${OpenCV_LIBRARIES}
 )
