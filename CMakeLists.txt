@@ -102,7 +102,7 @@ add_dependencies( observer
 )
 
 add_executable( bottom 
-    src/vison/vision_bottom.cpp
+    src/vision/vision_bottom.cpp
 )
 target_link_libraries( bottom 
     ${zeabus_library_LIBRARIES}
@@ -111,6 +111,20 @@ target_link_libraries( bottom
     ${OpenCV_LIBRARIES}
 )
 add_dependencies( bottom
+    cpe_project_generate_messages_cpp
+    ${PROJECT_NAME}_gencfg
+)
+
+add_executable( front 
+    src/vision/vision_front.cpp
+)
+target_link_libraries( front 
+    ${zeabus_library_LIBRARIES}
+    ${zeabus_vision_LIBRARIES}
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBRARIES}
+)
+add_dependencies( front
     cpe_project_generate_messages_cpp
     ${PROJECT_NAME}_gencfg
 )

@@ -1,4 +1,4 @@
-// FILE			: vision_bottom.cpp
+// FILE			: vision_front.cpp
 // AUTHOR		: K.Supasan
 // CREATE ON	: 2020, Febuary 26 (UTC+0)
 // MAINTAINER	: K.Supasan
@@ -33,9 +33,9 @@ unsigned int upper_third = 199;
 unsigned int down_first = 51;
 unsigned int down_second = 107;
 unsigned int down_third = 30;
-const double min_area = 500;
+const double min_area = 50;
 const double min_ratio = 0.8; // max is 1
-const double max_variance = 1000;
+const double max_variance = 200;
 bool dump_data = false;
 
 void dynamic_reconfigure_callback( cpe_project::Simple3DataConfig &config , uint32_t level )
@@ -77,7 +77,7 @@ void dynamic_reconfigure_callback( cpe_project::Simple3DataConfig &config , uint
 void imageCallback( const sensor_msgs::ImageConstPtr& msg )
 {
     lock_image.lock();
-    message_image_mat = cv_bridge::toCvShare( msg , "bgr8" )->image ;
+    message_image_mat = cv_bridge::toCvShare( msg , "rgb8" )->image ;
     message_image_header = msg->header;
     lock_image.unlock();
 }
@@ -85,7 +85,7 @@ void imageCallback( const sensor_msgs::ImageConstPtr& msg )
 int main( int argv , char** argc )
 {
 
-    zeabus_ros::Node node( argv , argc , "project_vision_bottom" );
+    zeabus_ros::Node node( argv , argc , "project_vision_front" );
 
     ros::NodeHandle nh( "" );
 
@@ -99,12 +99,12 @@ int main( int argv , char** argc )
 
     // _image_transport:=compressed
     image_transport::ImageTransport it( nh );
-    image_transport::Subscriber sub = it.subscribe( "/vision/bottom/image_raw",
+    image_transport::Subscriber sub = it.subscribe( "/vision/front/image_rect_color",
             1 , imageCallback );
     sensor_msgs::ImagePtr message_publish;
-    image_transport::Publisher pub_hsv = it.advertise( "/project/bottom/hsv" , 1 );
-    image_transport::Publisher pub_the = it.advertise( "/project/bottom/threshold" , 1 );
-    image_transport::Publisher pub_cnt = it.advertise( "/project/bottom/contours" , 1 );
+    image_transport::Publisher pub_hsv = it.advertise( "/project/front/hsv" , 1 );
+    image_transport::Publisher pub_the = it.advertise( "/project/front/threshold" , 1 );
+    image_transport::Publisher pub_cnt = it.advertise( "/project/front/contours" , 1 );
     ros::Publisher publish_results = nh.advertise< zeabus_utility::VisionResults >( 
             "/vision/results" , 1 );
     std::vector< zeabus_utility::VisionResult > data_results;
@@ -123,7 +123,7 @@ int main( int argv , char** argc )
     std::vector< std::vector< cv::Point > > contours;
     std::vector< cv::Vec4i > hierachy;
 
-    drh.load( "cpe_project" , "parameter" , "bottom.yaml" , ros::this_node::getName() );
+    drh.load( "cpe_project" , "parameter" , "front.yaml" , ros::this_node::getName() );
 
     std::vector< cv::Point2f > vec_center;    
     zeabus_opencv::structure::LineRect rect_line;
@@ -143,7 +143,7 @@ int main( int argv , char** argc )
 #else
             header.stamp = ros::Time::now();
 #endif
-            header.frame_id = "bottom_camera_optical";
+            header.frame_id = "front_camera_optical";
             new_message = true;
         }
         time_stamp = header.stamp;
@@ -152,7 +152,7 @@ int main( int argv , char** argc )
         if( ! new_message ) continue;
 
         cv::cvtColor( image_current , image_hsv , cv::COLOR_BGR2HSV );
-        message_publish = cv_bridge::CvImage( header , "bgr8" , image_hsv ).toImageMsg();
+        message_publish = cv_bridge::CvImage( header , "rgb8" , image_hsv ).toImageMsg();
         pub_hsv.publish( message_publish );
         lock_config.lock();
         cv::inRange( image_hsv , 
@@ -161,7 +161,7 @@ int main( int argv , char** argc )
                 image_threshold );
         if( dump_data )
         {
-            drh.dump( "cpe_project" , "parameter" , "bottom.yaml" , ros::this_node::getName() );
+            drh.dump( "cpe_project" , "parameter" , "front.yaml" , ros::this_node::getName() );
             dump_data = false;
         }
         lock_config.unlock();
@@ -242,25 +242,63 @@ int main( int argv , char** argc )
         vec_center.clear();
         zeabus_opencv::operations::pull_center( vec_circle , &vec_center );
         zeabus_opencv::sort::center( &vec_center );
-        if( vec_center.at( 0 ).x < vec_center.at( 1 ).x )
+        // First to consider 0 1 is have min y
+        unsigned int temp01, temp02 , temp03 , temp04 , temp;
+        if( vec_center.at( 0 ).y < vec_center.at( 1 ).y )
         {
-            rect_line.bl = vec_center.at( 0 );
-            rect_line.br = vec_center.at( 1 );
+            temp01 = 0; temp02 = 1; temp03 = 2; temp04 = 3;
         }
         else
         {
-            rect_line.bl = vec_center.at( 1 );
-            rect_line.br = vec_center.at( 0 );
+            temp01 = 1; temp02 = 0; temp03 = 2; temp04 = 3;
         }
-        if( vec_center.at( 2 ).x < vec_center.at( 3 ).x )
+        if( vec_center.at( temp03 ).y < vec_center.at( temp01 ).y )
         {
-            rect_line.tl = vec_center.at( 2 );
-            rect_line.tr = vec_center.at( 3 );
+            temp = temp03;
+            temp03 = temp02;
+            temp02 = temp01;
+            temp01 = temp;   
+        }
+        else if( vec_center.at( temp03 ).y < vec_center.at( temp02 ).y )
+        {
+            temp = temp03;
+            temp03 = temp02;
+            temp02 = temp;
+        }
+        else ; 
+        if( vec_center.at( temp04 ).y < vec_center.at( temp01 ).y )
+        {
+            temp = temp04;
+            temp04 = temp02;
+            temp02 = temp01;
+            temp01 = temp;   
+        }
+        else if( vec_center.at( temp04 ).y < vec_center.at( temp02 ).y )
+        {
+            temp = temp04;
+            temp03 = temp02;
+            temp02 = temp;
+        }
+        else ;
+        if( vec_center.at( temp01 ).x < vec_center.at( temp02 ).x )
+        {
+            rect_line.bl = vec_center.at( temp01 );
+            rect_line.br = vec_center.at( temp02 );
         }
         else
         {
-            rect_line.tl = vec_center.at( 3 );
-            rect_line.tr = vec_center.at( 2 );
+            rect_line.bl = vec_center.at( temp02 );
+            rect_line.br = vec_center.at( temp01 );
+        }
+        if( vec_center.at( temp03 ).x < vec_center.at( temp04 ).x )
+        {
+            rect_line.tl = vec_center.at( temp03 );
+            rect_line.tr = vec_center.at( temp04 );
+        }
+        else
+        {
+            rect_line.tl = vec_center.at( temp04 );
+            rect_line.tr = vec_center.at( temp03 );
         }
         
         cv::line( image_contours , rect_line.bl , rect_line.tl,
@@ -278,8 +316,8 @@ int main( int argv , char** argc )
         vec_object.push_back( cv::Point3_< double >( +292.91338583 , -255.11811024, 0 ) );
         
         cv::solvePnP( vec_object , rect_line.get_vector() , 
-                zeabus_opencv::bottom::mat_camera,
-                zeabus_opencv::bottom::mat_distor,
+                zeabus_opencv::front::mat_camera,
+                zeabus_opencv::front::mat_distor,
                 rotation_vector,
                 translation_vector );
 
@@ -297,11 +335,12 @@ int main( int argv , char** argc )
 
         data_results.push_back( vision_result( header.stamp , 
                 header.frame_id,
-                "bottom_sign",
+                "front_sign",
                 rotation_vector,
                 translation_vector ) );
         message_results.data = data_results;
-        publish_results.publish( message_results );
+        publish_results.publish( message_results ); 
+
         cv::rectangle( image_contours , 
                 cv::Point_< int >( 0 , 0 ),
                 cv::Point_< int >( 600 , 200 ),
@@ -320,7 +359,7 @@ int main( int argv , char** argc )
                 cv::FONT_HERSHEY_SIMPLEX , 2 , 
                 cv::Scalar_< unsigned int >( 255 , 255 , 255 ) , 3 , cv::FILLED , false );
 finish_find_box:
-        message_publish = cv_bridge::CvImage( header , "rgb8" , image_contours ).toImageMsg();
+        message_publish = cv_bridge::CvImage( header , "bgr8" , image_contours ).toImageMsg();
         pub_cnt.publish( message_publish );
     }
 
