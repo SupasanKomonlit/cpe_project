@@ -48,8 +48,8 @@ catkin_package(
 )
 
 add_executable( subject_3_3 
-    src/listen_overview.cpp
-    src/purpose_3_3.cpp
+    src/listen/listen_overview.cpp
+    src/listen/purpose_3_3.cpp
 )
 target_link_libraries( subject_3_3 
     ${zeabus_library_LIBRARIES}
@@ -61,8 +61,8 @@ add_dependencies( subject_3_3
 )
 
 add_executable( find_center
-    src/learn_center.cpp
-    src/learn_center_model.cpp
+    src/learn_center/learn_center.cpp
+    src/learn_center/learn_center_model.cpp
 )
 target_link_libraries( find_center
     ${zeabus_library_LIBRARIES}
@@ -74,8 +74,8 @@ add_dependencies( find_center
 )
 
 add_executable( find_inertia 
-    src/learn_moment_inertia_model.cpp
-    src/learn_moment_inertia.cpp
+    src/learn_moment/learn_moment_inertia_model.cpp
+    src/learn_moment/learn_moment_inertia.cpp
 )
 target_link_libraries( find_inertia
     ${zeabus_library_LIBRARIES}
@@ -87,10 +87,10 @@ add_dependencies( find_inertia
 )
 
 add_executable( observer 
-    src/observer.cpp
-    src/observer_model.cpp
-    src/observer_update.cpp
-    src/observer_gradient.cpp
+    src/observer/observer.cpp
+    src/observer/observer_model.cpp
+    src/observer/observer_update.cpp
+    src/observer/observer_gradient.cpp
 )
 target_link_libraries( observer
     ${zeabus_library_LIBRARIES}
@@ -102,7 +102,7 @@ add_dependencies( observer
 )
 
 add_executable( bottom 
-    src/vision_bottom.cpp
+    src/vison/vision_bottom.cpp
 )
 target_link_libraries( bottom 
     ${zeabus_library_LIBRARIES}
