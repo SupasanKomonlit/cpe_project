@@ -310,10 +310,10 @@ int main( int argv , char** argc )
         cv::line( image_contours , rect_line.tr , rect_line.br,
                 cv::Scalar( 255 , 255 , 0 ) , 5 , cv::LINE_8 );
 
-        vec_object.push_back( cv::Point3_< double >( -292.91338583 , -255.11811024, 0 ) );
-        vec_object.push_back( cv::Point3_< double >( -292.91338583 , +255.11811024, 0 ) );
-        vec_object.push_back( cv::Point3_< double >( +292.91338583 , +255.11811024, 0 ) );
-        vec_object.push_back( cv::Point3_< double >( +292.91338583 , -255.11811024, 0 ) );
+        vec_object.push_back( cv::Point3_< double >( -255.11811024 , -274.01574803, 0 ) );
+        vec_object.push_back( cv::Point3_< double >( -255.11811024 , +274.01574803, 0 ) );
+        vec_object.push_back( cv::Point3_< double >( +255.11811024 , +274.01574803, 0 ) );
+        vec_object.push_back( cv::Point3_< double >( +255.11811024 , -274.01574803, 0 ) );
         
         cv::solvePnP( vec_object , rect_line.get_vector() , 
                 zeabus_opencv::front::mat_camera,
