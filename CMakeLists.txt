@@ -89,6 +89,7 @@ add_dependencies( find_inertia
 add_executable( observer 
     src/observer/observer.cpp
     src/observer/observer_model.cpp
+    src/observer/observer_limit.cpp
     src/observer/observer_update.cpp
     src/observer/observer_gradient.cpp
 )
@@ -98,6 +99,45 @@ target_link_libraries( observer
     ${catkin_LIBRARIES}
 )
 add_dependencies( observer 
+    cpe_project_generate_messages_cpp
+)
+
+add_executable( train_z 
+    src/model/train_z.cpp
+    src/model/center_function.cpp
+)
+target_link_libraries( train_z
+    ${zeabus_library_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${catkin_LIBRARIES}
+)
+add_dependencies( train_z 
+    cpe_project_generate_messages_cpp
+)
+
+add_executable( train_x 
+    src/model/train_x.cpp
+    src/model/center_function.cpp
+)
+target_link_libraries( train_x
+    ${zeabus_library_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${catkin_LIBRARIES}
+)
+add_dependencies( train_x 
+    cpe_project_generate_messages_cpp
+)
+
+add_executable( train_y
+    src/model/train_y.cpp
+    src/model/center_function.cpp
+)
+target_link_libraries( train_y
+    ${zeabus_library_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${catkin_LIBRARIES}
+)
+add_dependencies( train_y
     cpe_project_generate_messages_cpp
 )
 

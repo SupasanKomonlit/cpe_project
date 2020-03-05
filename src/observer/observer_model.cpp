@@ -10,6 +10,7 @@
 // REFERENCE
 
 // MACRO SET
+#define _PRINT_FORCE_
 
 // MACRO CONDITION
 
@@ -45,20 +46,55 @@ void active_model()
                     zeabus::robot::mat_force_buoncy );
 
     zeabus_boost::mat_concat( &mat_force_estimate,
-            mat_rotation_force_z * zeabus::robot::mat_force_buoncy,
+            mat_rotation_force_z * zeabus::robot::mat_force_constant,
             zeabus::robot::mat_center_constant *
                     mat_rotation_force_z *
                     zeabus::robot::mat_force_constant );
 
     calculate_viscosity();
 
-    mat_acceleration = zeabus::robot::mat_inertia_inverse * (
-            mat_force_gravity +
+    mat_acceleration = mat_force_gravity +
             mat_force_buoncy + 
             mat_force_estimate +
             mat_force_viscosity +
             mat_force_thruster +
-            mat_force_observer );
+            mat_force_observer ;
+
+#ifdef _PRINT_FORCE_
+    boost::qvm::mat< double , 1 , 6 > temp_mat;
+    std::cout   << "estimate force  :";
+    temp_mat = boost::qvm::transposed( mat_force_estimate );
+    zeabus_boost::print( temp_mat );
+    std::cout   << "observer force  :";
+    temp_mat = boost::qvm::transposed( mat_force_observer );
+    zeabus_boost::print( temp_mat );
+    std::cout   << "buoncy force    :";
+    temp_mat = boost::qvm::transposed( mat_force_buoncy );
+    zeabus_boost::print( temp_mat );
+    std::cout   << "gravity force   :";
+    temp_mat = boost::qvm::transposed( mat_force_gravity );
+    zeabus_boost::print( temp_mat );
+    std::cout   << "viscosity force :";
+    temp_mat = boost::qvm::transposed( mat_force_viscosity );
+    zeabus_boost::print( temp_mat );
+    std::cout   << "Thruster force  :";
+    temp_mat = boost::qvm::transposed( mat_force_thruster  );
+    zeabus_boost::print( temp_mat );
+    std::cout   << "Summation Force :"; 
+    temp_mat = boost::qvm::transposed( mat_acceleration );
+    zeabus_boost::print( temp_mat );
+#endif
+
+    mat_acceleration = zeabus::robot::mat_inertia_inverse * mat_acceleration;
+    if( fabs( mat_acceleration.a[0][0] ) < 0.02 ) mat_acceleration.a[0][0] = 0;
+    if( fabs( mat_acceleration.a[1][0] ) < 0.02 ) mat_acceleration.a[1][0] = 0;
+    if( fabs( mat_acceleration.a[2][0] ) < 0.02 ) mat_acceleration.a[2][0] = 0;
+#ifdef _PRINT_FORCE_
+    std::cout   << "accel force     :";
+    temp_mat = boost::qvm::transposed( mat_acceleration  );
+    zeabus_boost::print( temp_mat );
+    std::cout   << "\n";
+#endif
 }
 
 inline void calculate_viscosity()
@@ -77,6 +113,6 @@ inline double viscosity( unsigned int index )
     return -1.0 * mat_constant_viscosity_k.a[ index ][0] * 
             ( 1 - exp( -1.0 * mat_constant_viscosity_c.a[ index ][0] * arr_robot_velocity[ index ]));
 #else
-    return mat_constant_viscosity_k.a[ index ][0] * arr_robot_velocity[ index ][0];
+    return -1.0 * mat_constant_viscosity_k.a[ index ][0] * arr_robot_velocity[ index ][0];
 #endif // viscosity
 }

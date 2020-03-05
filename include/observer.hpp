@@ -47,6 +47,7 @@
 #include    <std_msgs/String.h>
 #include    <nav_msgs/Odometry.h>
 #include    <zeabus_utility/Float64Array8.h>
+#include    <zeabus_utility/Float64Array6.h>
 
 #include    <boost/array.hpp>
 
@@ -56,11 +57,11 @@
 #include    <boost/qvm/vec_operations.hpp>
 #include    <boost/qvm/mat_operations.hpp>
 
-const double global_max_z = 0.1;
-const double global_min_z = -5.0;
+const double global_max_z = -0.1;
+const double global_min_z = -4.7;
 const double global_diff_z = 0.2;
 const double global_diff_z_half = global_diff_z / 2;
-const double global_active_observer = -0.5;
+const double global_active_observer = -0.2;
 
 // Part variable on observer_model.cpp
 //  boost::qvm::mat< class type , int row , int column >
@@ -111,7 +112,13 @@ extern nav_msgs::Odometry message_observer_zeabus;
 extern ros::Publisher publisher_message;
 extern tf::Quaternion current_quaternion;
 
+#ifndef _CPE_PROJECT_OBSERVER_LIMIT__
+#define _CPE_PROJECT_OBSERVER_LIMIT__
+void limit_data();
+void limit_depth();
+#endif // _CPE_PROJECT_OBSERVER_LIMIT__
+
 #ifndef _CPE_PROJECT_OBSERVER__
 #define _CPE_PROJECT_OBSERVER__
-void pub( const std::string message );
-#endif 
+void pub( const std::string message , const bool print = false );
+#endif // _CPE_PROJECT_OBSERVER__ 
