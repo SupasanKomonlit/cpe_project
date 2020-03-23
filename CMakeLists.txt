@@ -86,19 +86,19 @@ add_dependencies( find_inertia
     cpe_project_generate_messages_cpp
 )
 
-add_executable( observer 
+add_executable( observe
     src/observer/observer.cpp
     src/observer/observer_model.cpp
     src/observer/observer_limit.cpp
     src/observer/observer_update.cpp
     src/observer/observer_gradient.cpp
 )
-target_link_libraries( observer
+target_link_libraries( observe
     ${zeabus_library_LIBRARIES}
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
 )
-add_dependencies( observer 
+add_dependencies( observe
     cpe_project_generate_messages_cpp
 )
 

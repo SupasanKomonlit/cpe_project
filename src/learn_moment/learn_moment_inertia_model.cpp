@@ -43,7 +43,7 @@ void prepare_z_force()
 
     mat_buoncy_force = zeabus::robot::mat_center_buoncy *
             mat_rotation_force *
-            zeabus::robot::mat_force_gravity;
+            zeabus::robot::mat_force_buoncy;
 
     mat_constant_force = zeabus::robot::mat_center_constant *
             mat_rotation_force *
