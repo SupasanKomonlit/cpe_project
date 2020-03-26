@@ -61,7 +61,7 @@ class Subject33Roll:
                 while self.ch.ok() and self.state:
                     self.ch.add_force( roll = 1.2 )
                     self.ch.sleep()
-                    if ( rospy.get_rostime() - start_time ).to_sec() < 20:
+                    if ( rospy.get_rostime() - start_time ).to_sec() > 20:
                         break
 
                 self.ch.pub( "Command addition force negative roll" )
@@ -69,7 +69,7 @@ class Subject33Roll:
                 while self.ch.ok() and self.state:
                     self.ch.add_force( roll = -1.2 )
                     self.ch.sleep()
-                    if ( rospy.get_rostime() - start_time ).to_sec() < 20:
+                    if ( rospy.get_rostime() - start_time ).to_sec() > 20:
                         break
 
                 self.ch.absolute_roll( 0 )

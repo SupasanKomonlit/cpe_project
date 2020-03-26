@@ -67,7 +67,7 @@ class Subject33Pitch:
                 while self.ch.ok() and self.state:
                     self.ch.add_force( yaw = 0.8 )
                     self.ch.sleep()
-                    if ( rospy.get_rostime() - start_time ).to_sec() < 20:
+                    if ( rospy.get_rostime() - start_time ).to_sec() > 20:
                         break
 
                 self.ch.pub( "Command addition force negative yaw" )
@@ -75,7 +75,7 @@ class Subject33Pitch:
                 while self.ch.ok() and self.state:
                     self.ch.add_force( yaw = -0.8 )
                     self.ch.sleep()
-                    if ( rospy.get_rostime() - start_time ).to_sec() < 20:
+                    if ( rospy.get_rostime() - start_time ).to_sec() > 20:
                         break
 
                 self.ch.add_force( yaw = 0 )
@@ -87,7 +87,7 @@ class Subject33Pitch:
                 self.state = False
 
                 if self.ch.ok():
-                    print( "Stop process by ros shutdon" )
+                    print( "Stop process by ros shutdown" )
                     break
 
     def callback_state( self , request ):
