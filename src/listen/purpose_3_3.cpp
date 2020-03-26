@@ -37,8 +37,8 @@ void calculate()
     std::memcpy( (void*) &mat_force_buoncy.a[0][0],
             (void*) vec_temporary.a ,
             sizeof( double ) * 3 );
-    vec_temporary = boost::qvm::cross( vec_temporary , 
-            zeabus::robot::distance_center_buoncy );
+    vec_temporary = boost::qvm::cross( zeabus::robot::vec_center_buoncy ,
+            vec_temporary );
     std::memcpy( (void*) &mat_force_buoncy.a[0][3],
             (void*) vec_temporary.a ,
             sizeof( double ) * 3 );
@@ -51,8 +51,8 @@ void calculate()
     std::memcpy( (void*) &mat_force_gravity.a[0][0],
             (void*) vec_temporary.a ,
             sizeof( double ) * 3 );
-    vec_temporary = boost::qvm::cross( vec_temporary , 
-            zeabus::robot::distance_center_gravity );
+    vec_temporary = boost::qvm::cross( zeabus::robot::vec_center_gravity ,
+            vec_temporary );
     std::memcpy( (void*) &mat_force_gravity.a[0][3],
             (void*) vec_temporary.a ,
             sizeof( double ) * 3 );
