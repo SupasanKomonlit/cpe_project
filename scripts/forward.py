@@ -65,7 +65,7 @@ class Subject33Pitch:
                 while self.ch.ok() and self.state:
                     self.ch.add_force( x = 1.5 )
                     self.ch.sleep()
-                    if ( rospy.get_rostime() - start_time ).to_sec() < 100:
+                    if ( rospy.get_rostime() - start_time ).to_sec() > 100:
                         break
 
                 self.ch.add_force( x = 0 )
