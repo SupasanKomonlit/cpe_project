@@ -15,15 +15,15 @@ find_package( catkin REQUIRED COMPONENTS
 
 find_package( Boost REQUIRED COMPONENTS )
 find_package( zeabus_library REQUIRED COMPONENTS )
-find_package( zeabus_vision REQUIRED COMPONENTS )
-find_package( OpenCV REQUIRED  )
+#find_package( zeabus_vision REQUIRED COMPONENTS )
+#find_package( OpenCV REQUIRED  )
 
 include_directories(
     ${catkin_INCLUDE_DIRS}
     ${zeabus_library_INCLUDE_DIRS}
     ${zeabus_vision_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
-    ${OpenCV_INCLUDE_DIRS}
+#    ${OpenCV_INCLUDE_DIRS}
     "${PROJECT_SOURCE_DIR}/include"
 )
 
@@ -141,30 +141,30 @@ add_dependencies( train_y
     cpe_project_generate_messages_cpp
 )
 
-add_executable( bottom 
-    src/vision/vision_bottom.cpp
-)
-target_link_libraries( bottom 
-    ${zeabus_library_LIBRARIES}
-    ${zeabus_vision_LIBRARIES}
-    ${catkin_LIBRARIES}
-    ${OpenCV_LIBRARIES}
-)
-add_dependencies( bottom
-    cpe_project_generate_messages_cpp
-    ${PROJECT_NAME}_gencfg
-)
-
-add_executable( front 
-    src/vision/vision_front.cpp
-)
-target_link_libraries( front 
-    ${zeabus_library_LIBRARIES}
-    ${zeabus_vision_LIBRARIES}
-    ${catkin_LIBRARIES}
-    ${OpenCV_LIBRARIES}
-)
-add_dependencies( front
-    cpe_project_generate_messages_cpp
-    ${PROJECT_NAME}_gencfg
-)
+#add_executable( bottom 
+#    src/vision/vision_bottom.cpp
+#)
+#target_link_libraries( bottom 
+#    ${zeabus_library_LIBRARIES}
+#    ${zeabus_vision_LIBRARIES}
+#    ${catkin_LIBRARIES}
+#    ${OpenCV_LIBRARIES}
+#)
+#add_dependencies( bottom
+#    cpe_project_generate_messages_cpp
+#    ${PROJECT_NAME}_gencfg
+#)
+#
+#add_executable( front 
+#    src/vision/vision_front.cpp
+#)
+#target_link_libraries( front 
+#    ${zeabus_library_LIBRARIES}
+#    ${zeabus_vision_LIBRARIES}
+#    ${catkin_LIBRARIES}
+#    ${OpenCV_LIBRARIES}
+#)
+#add_dependencies( front
+#    cpe_project_generate_messages_cpp
+#    ${PROJECT_NAME}_gencfg
+#)

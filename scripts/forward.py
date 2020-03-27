@@ -39,7 +39,7 @@ class Subject33Pitch:
             rospy.sleep( 0.25 )
             reset_state = True
             while self.state : # Lopp working
-
+                print( "Loop working" )
                 if reset_state:
                     self.ch.activate( True )
                     self.ch.sleep()
@@ -55,11 +55,13 @@ class Subject33Pitch:
                     self.ch.sleep()
                     reset_state = False
 
+                print( "Waiting z is ok")
                 self.ch.pub( "Waiting z ok position in one" )
                 self.ch.sleep()
                 while ( not self.ch.check_error( z = 0.05 ) ) and self.ch.ok() and self.state:
                     self.ch.sleep()
 
+                print( "Command forward")
                 self.ch.pub( "Command addition force positive forward" )
                 start_time = rospy.get_rostime()
                 while self.ch.ok() and self.state:
