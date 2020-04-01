@@ -17,7 +17,8 @@
 //  ref05 : https://stackoverflow.com/questions/26218280/thresholding-rgb-image-in-opencv
 
 // MACRO SET
-#define _USE_SIM_TIME_
+// #define _USE_SIM_TIME_ //  define this when you want to reset vision time stamp
+// #define _PRINT_RESULTS_
 
 // MACRO CONDITION
 
@@ -129,7 +130,8 @@ int main( int argv , char** argc )
     zeabus_opencv::structure::LineRect rect_line;
 
     std::string temp_text;
-    
+    double diff_horizontal;
+    double diff_vertical; 
     while( ros::ok() )
     {
         data_results.clear();
@@ -321,43 +323,80 @@ int main( int argv , char** argc )
                 rotation_vector,
                 translation_vector );
 
+#ifdef _PRINT_RESULTS_
         std::cout   << "Rotation vector row " << rotation_vector.rows
                     << " and col " << rotation_vector.cols << "\n";
+#endif // _PRINT_RESULTS_
         zeabus_opencv::convert::to_m( translation_vector[0] );
         zeabus_opencv::convert::to_m( translation_vector[1] );
         zeabus_opencv::convert::to_m( translation_vector[2] );
+#ifdef _PRINT_RESULTS_
         printf( "%10.3f,%10.3f,%10.3f\n", *rotation_vector[ 0 ] , *rotation_vector[ 1 ],
                 *rotation_vector[ 2 ] );
         std::cout   << "Translation vector row " << translation_vector.rows
                     << " and col " << translation_vector.cols << "\n";
         printf( "%10.3f,%10.3f,%10.3f\n", *translation_vector[ 0 ] , *translation_vector[ 1 ],
                 *translation_vector[ 2 ] );
-
-        data_results.push_back( vision_result( header.stamp , 
-                header.frame_id,
-                "front_sign",
-                rotation_vector,
-                translation_vector ) );
-        message_results.data = data_results;
-        publish_results.publish( message_results ); 
+#endif // _PRINT_RESULTS_
 
         cv::rectangle( image_contours , 
                 cv::Point_< int >( 0 , 0 ),
                 cv::Point_< int >( 600 , 200 ),
                 cv::Scalar_< unsigned int >( 255 , 0 , 0 ),
                 cv::FILLED , cv::LINE_8 );
-        temp_text = "X = " + std::to_string( *translation_vector[ 0 ] );
-        cv::putText( image_contours, temp_text, cv::Point_< double >( 0 , 60 ) , 
-                cv::FONT_HERSHEY_SIMPLEX , 2 , 
-                cv::Scalar_< unsigned int >( 255 , 255 , 255 ) , 3 , cv::FILLED , false );
-        temp_text = "Y = " + std::to_string( *translation_vector[ 1 ] );
-        cv::putText( image_contours, temp_text, cv::Point_< double >( 0 , 130 ) , 
-                cv::FONT_HERSHEY_SIMPLEX , 2 , 
-                cv::Scalar_< unsigned int >( 255 , 255 , 255 ) , 3 , cv::FILLED , false );
-        temp_text = "Z = " + std::to_string( *translation_vector[ 2 ] );
-        cv::putText( image_contours, temp_text, cv::Point_< double >( 0 , 200 ) , 
-                cv::FONT_HERSHEY_SIMPLEX , 2 , 
-                cv::Scalar_< unsigned int >( 255 , 255 , 255 ) , 3 , cv::FILLED , false );
+
+        diff_horizontal =  fabs( 
+                zeabus_opencv::operations::distance( rect_line.bl , rect_line.br ) - 
+                zeabus_opencv::operations::distance( rect_line.tl , rect_line.tr ) ) ;
+        diff_vertical =  fabs( 
+                zeabus_opencv::operations::distance( rect_line.tr , rect_line.br ) - 
+                zeabus_opencv::operations::distance( rect_line.tl , rect_line.bl ) ) ;
+
+        std::cout   << "Diff hori and verti are " << diff_horizontal 
+                    << " and " << diff_vertical << "\n";
+
+        if( diff_horizontal > 5 )
+        {
+            std::cout   << zeabus::escape_code::bold_yellow << "ABORT : "
+                        << zeabus::escape_code::normal_white << "Because horizontal line\n";
+            temp_text = "ABORT Data on horizontal line";
+            cv::putText( image_contours, temp_text, cv::Point_< double >( 0 , 60 ) , 
+                    cv::FONT_HERSHEY_SIMPLEX , 2 , 
+                    cv::Scalar_< unsigned int >( 255 , 255 , 255 ) , 3 , cv::FILLED , false );
+        }
+        else if( diff_vertical > 5 )
+        {
+            std::cout   << zeabus::escape_code::bold_yellow << "ABORT : "
+                        << zeabus::escape_code::normal_white << "Because vertical line\n";
+            temp_text = "ABORT Data on vertical line";
+            cv::putText( image_contours, temp_text, cv::Point_< double >( 0 , 60 ) , 
+                    cv::FONT_HERSHEY_SIMPLEX , 2 , 
+                    cv::Scalar_< unsigned int >( 255 , 255 , 255 ) , 3 , cv::FILLED , false );
+        }
+        else
+        {
+            data_results.push_back( vision_result( header.stamp , 
+                    header.frame_id,
+                    "front_sign",
+                    rotation_vector,
+                    translation_vector ) );
+            message_results.data = data_results;
+            publish_results.publish( message_results );
+
+            temp_text = "X = " + std::to_string( *translation_vector[ 0 ] );
+            cv::putText( image_contours, temp_text, cv::Point_< double >( 0 , 60 ) , 
+                    cv::FONT_HERSHEY_SIMPLEX , 2 , 
+                    cv::Scalar_< unsigned int >( 255 , 255 , 255 ) , 3 , cv::FILLED , false );
+            temp_text = "Y = " + std::to_string( *translation_vector[ 1 ] );
+            cv::putText( image_contours, temp_text, cv::Point_< double >( 0 , 130 ) , 
+                    cv::FONT_HERSHEY_SIMPLEX , 2 , 
+                    cv::Scalar_< unsigned int >( 255 , 255 , 255 ) , 3 , cv::FILLED , false );
+            temp_text = "Z = " + std::to_string( *translation_vector[ 2 ] );
+            cv::putText( image_contours, temp_text, cv::Point_< double >( 0 , 200 ) , 
+                    cv::FONT_HERSHEY_SIMPLEX , 2 , 
+                    cv::Scalar_< unsigned int >( 255 , 255 , 255 ) , 3 , cv::FILLED , false );
+        } 
+
 finish_find_box:
         message_publish = cv_bridge::CvImage( header , "bgr8" , image_contours ).toImageMsg();
         pub_cnt.publish( message_publish );

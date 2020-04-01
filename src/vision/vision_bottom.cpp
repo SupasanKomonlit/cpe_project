@@ -17,7 +17,7 @@
 //  ref05 : https://stackoverflow.com/questions/26218280/thresholding-rgb-image-in-opencv
 
 // MACRO SET
-#define _USE_SIM_TIME_
+// #define _USE_SIM_TIME_ //  define this when you want to reset vision time stamp
 
 // MACRO CONDITION
 

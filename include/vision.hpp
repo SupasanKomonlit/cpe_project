@@ -27,6 +27,7 @@
 #include    <zeabus/ros/dynamic_reconfigure.hpp>
 #include    <zeabus/ros/convert/geometry_quaternion.hpp>
 #include    <zeabus/ros/convert/geometry_vector3.hpp>
+#include    <zeabus/escape_code.hpp>
 
 #include    <zeabus/opencv.hpp>
 
