@@ -355,7 +355,7 @@ int main( int argv , char** argc )
         std::cout   << "Diff hori and verti are " << diff_horizontal 
                     << " and " << diff_vertical << "\n";
 
-        if( diff_horizontal > 5 )
+        if( diff_horizontal > 20 )
         {
             std::cout   << zeabus::escape_code::bold_yellow << "ABORT : "
                         << zeabus::escape_code::normal_white << "Because horizontal line\n";
@@ -364,7 +364,7 @@ int main( int argv , char** argc )
                     cv::FONT_HERSHEY_SIMPLEX , 2 , 
                     cv::Scalar_< unsigned int >( 255 , 255 , 255 ) , 3 , cv::FILLED , false );
         }
-        else if( diff_vertical > 5 )
+        else if( diff_vertical > 20 )
         {
             std::cout   << zeabus::escape_code::bold_yellow << "ABORT : "
                         << zeabus::escape_code::normal_white << "Because vertical line\n";
