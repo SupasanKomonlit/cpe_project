@@ -62,20 +62,20 @@ class Subject33Pitch:
 
                 self.ch.set_mask( yaw = False )
 
-                self.ch.pub( "Command addition force positive yaw" )
+                self.ch.pub( "Command addition force positive pitch" )
                 start_time = rospy.get_rostime()
                 while self.ch.ok() and self.state:
-                    self.ch.add_force( pitch = -2 )
+                    self.ch.add_force( pitch = 2 )
                     self.ch.sleep()
-                    if ( rospy.get_rostime() - start_time ).to_sec() < 20:
+                    if ( rospy.get_rostime() - start_time ).to_sec() > 20:
                         break
 
-                self.ch.pub( "Command addition force negative yaw" )
+                self.ch.pub( "Command addition force negative pitch" )
                 start_time = rospy.get_rostime()
                 while self.ch.ok() and self.state:
                     self.ch.add_force( pitch = -2 )
                     self.ch.sleep()
-                    if ( rospy.get_rostime() - start_time ).to_sec() < 20:
+                    if ( rospy.get_rostime() - start_time ).to_sec() > 20:
                         break
 
                 self.ch.add_force( yaw = 0 )
