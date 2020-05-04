@@ -131,7 +131,7 @@ int main( int argv , char** argc )
 
     std::string temp_text;
     double diff_horizontal;
-    double diff_vertical; 
+    double diff_vertical;
     while( ros::ok() )
     {
         data_results.clear();
@@ -152,7 +152,6 @@ int main( int argv , char** argc )
         lock_image.unlock();
 
         if( ! new_message ) continue;
-
         cv::cvtColor( image_current , image_hsv , cv::COLOR_BGR2HSV );
         message_publish = cv_bridge::CvImage( header , "rgb8" , image_hsv ).toImageMsg();
         pub_hsv.publish( message_publish );
